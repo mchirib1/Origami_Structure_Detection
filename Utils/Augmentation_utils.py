@@ -1,7 +1,6 @@
 import os
 import random
 import shutil
-import time
 from datetime import date
 
 import cv2
@@ -172,12 +171,12 @@ class DataAugmenter:
                 # desired height and width
                 h, w = img.shape[:2]
 
-                r = round(random.uniform(0.65, 1),2)
+                r = round(random.uniform(0.65, 1), 2)
 
                 new_h = round(h * r)
                 new_w = round(w * r)
 
-                resized = cv2.resize(img,(new_w, new_h))
+                resized = cv2.resize(img, (new_w, new_h))
 
                 pad = np.zeros(img.shape[:3])
                 y_offset = 0

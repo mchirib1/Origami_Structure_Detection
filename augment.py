@@ -50,11 +50,11 @@ def augment():
     # these two methods zero out certain quadrants of the image changing the density of the data within the image
     if opts.quad1:
         aug = DataAugmenter(src)
-        aug.quadrant_1(dst) # sets all pixels outside upper left quadrant to 0
+        aug.quadrant_1(dst)  # sets all pixels outside upper left quadrant to 0
 
     if opts.quad3:
         aug = DataAugmenter(src)
-        aug.quadrant_3(dst) # sets all pixels outside lower right quadrant to 0
+        aug.quadrant_3(dst)  # sets all pixels outside lower right quadrant to 0
 
 
 parser = argparse.ArgumentParser(description='CLI tool for augmenting source images and corresponding annotations beore feeding into the YOLO machine learning framework.')

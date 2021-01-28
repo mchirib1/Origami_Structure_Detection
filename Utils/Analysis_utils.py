@@ -1,9 +1,9 @@
 import os
-import time
 from datetime import date
 
 import cv2
 from matplotlib import pyplot as plt
+
 
 class DataAnalyzer:
     '''A class to help with data augmentation of the triangle image analysis data.  Handles things like numerical
@@ -22,8 +22,6 @@ class DataAnalyzer:
     def count_annotations(self, dst_path):
         '''Counts the number of annotated structures stored in each text file.'''
 
-        # start timer for metrics
-        start = time.time()
         os.chdir(self.src_dir)
 
         # sets a file counter and a total annotations counter
@@ -53,14 +51,11 @@ class DataAnalyzer:
                 n += 1
 
             # prints basic statistics and details to the outfile
-            fin = time.time() - start
             print(f'There are n = {i} annotations across {n} the files checked.', file=outfile)
 
     def count_predictions(self, dst_path):
         '''Counts the number of predicted structures stored in each text file.'''
 
-        # metrics on how the code is running
-        start = time.time()
         os.chdir(self.src_dir)
 
         # sets a file counter and a total annotations counter
@@ -90,7 +85,6 @@ class DataAnalyzer:
                 n += 1
 
             # prints basic statistics and details to the outfile
-            fin = time.time() - start
             print(f'There are n = {i} predictions across {n} the files checked.', file=outfile)
 
     def count_image_dimensions(self, dst_path):
