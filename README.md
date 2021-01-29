@@ -16,6 +16,8 @@ A Jupyter Notebook walkthrough using the YOLOv5 framework for training and detec
 
 The data downloaded from the previous augmentation step can be used to create a training and validation set. Example testing data is available in the datasets directory. 
 
+Pretrained weights for both the breadboard structure and the triangle structure are also included.
+
 ## Analysis
 
 A MATLAB script we used for analysis of the results is also included in the matlab directory.
