@@ -5,7 +5,7 @@ import os
 import time
 from datetime import date
 
-from Utils.Augmentation_utils import DataAugmenter
+from utils.augmentation_utils import DataAugmenter
 
 
 def augment():

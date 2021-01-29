@@ -5,7 +5,7 @@ import os
 import time
 from datetime import date
 
-from Utils.Analysis_utils import DataAnalyzer
+from utils.analysis_utils import DataAnalyzer
 
 
 def analyze():
