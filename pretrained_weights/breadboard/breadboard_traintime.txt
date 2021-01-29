@@ -1,0 +1,2 @@
+Training completed in 2.081 hours
+Setup complete. Using torch 1.7.0+cu101 _CudaDeviceProperties(name='Tesla P100-PCIE-16GB', major=6, minor=0, total_memory=16280MB, multi_processor_count=56)
