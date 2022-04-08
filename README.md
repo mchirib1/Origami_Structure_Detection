@@ -1,3 +1,7 @@
+Repository is associated with the article 
+
+Chiriboga, M., Green, C.M., Hastman, D.A. et al. Rapid DNA origami nanostructure detection and classification using the YOLOv5 deep convolutional neural network. Sci Rep 12, 3871 (2022). https://doi.org/10.1038/s41598-022-07759-3
+
 # Origami Structure Detection
 
 Tools for dataset augmentation and analysis. These tools are used in conjuntion with the YOLOv5 object detection framework. (https://github.com/ultralytics/yolov5)
