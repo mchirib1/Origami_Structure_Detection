@@ -203,7 +203,7 @@ class DataAugmenter:
         init_output_dir(dst_path)
         
         # loop through the images
-        for n, image in enumerate(self.images):
+        for n, image in enumerate(self.images, start=1):
             image_name = image.split('.')[0]
             img_gray = cv2.imread(f'{self.src_dir}/{image}', cv2.IMREAD_GRAYSCALE)
 
@@ -228,7 +228,7 @@ class DataAugmenter:
         init_output_dir(dst_path)
 
         # loop through images
-        for n, image in enumerate(self.images):
+        for n, image in enumerate(self.images,start=1):
             image_name = image.split('.')[0]
             img = cv2.imread(f'{self.src_dir}/{image}', cv2.IMREAD_COLOR)
 
@@ -262,7 +262,7 @@ class DataAugmenter:
         for _ in range(0, n_rotations):
 
             # loops over each image to rotate
-            for image in self.images:
+            for n, image in enumerate(self.images, start=1):
                 image_name = image.split('.')[0]
 
                 # sets random integer for rotation angle
@@ -287,25 +287,18 @@ class DataAugmenter:
                         print(f'{line2[0]} {line2[1]:0.6f} {line2[2]:0.6f} {line2[3]:0.6f} {line2[4]:0.6f}',
                               file=outfile)
 
-        print(f'{len(self.images)} images rotated {n_rotations} times. Output:{len(self.images)*n_rotations} images')
+        print(f'{n} images rotated {n_rotations} times. Output:{n*n_rotations} images')
 
     def quadrant_1(self, dst_path):
 
-        os.chdir(self.src_dir)
-
-        # make the directory to store results
-        try:
-            os.mkdir(dst_path)
-        except FileExistsError:
-            pass
+        # make directory to store results
+        init_output_dir(dst_path)
 
         # open txt doc to write out statistics
         with open(f'{dst_path}results.txt', 'w') as outfile:
-            # counter
-            n = 0
 
             # loop over images in the src directory
-            for image in self.images:
+            for n, image in enumerate(self.images, start=1):
                 image_name = image.split('.')[0]
                 img = cv2.imread(image, cv2.IMREAD_COLOR)
 
@@ -321,28 +314,18 @@ class DataAugmenter:
                 # writes new images to the results directory
                 cv2.imwrite(f'{dst_path}/1quad_{image_name}.png', img)
 
-                # updates counter
-                n += 1
-
             # writes out some performance values
             print(f'n = {n} images were resized changed to quadrant 1 only.', file=outfile)
 
     def quadrant_3(self, dst_path):
 
-        os.chdir(self.src_dir)
-
-        # make the directory to store results
-        try:
-            os.mkdir(dst_path)
-        except FileExistsError:
-            pass
+        # make directory to store results
+        init_output_dir(dst_path)
 
         # open txt doc to write out statistics
         with open(f'{dst_path}/results.txt', 'w') as outfile:
-            # counter
-            n = 0
 
-            for image in self.images:
+            for image in enumerate(self.images, start=1):
                 image_name = image.split('.')[0]
                 img = cv2.imread(image, cv2.IMREAD_COLOR)
 
@@ -357,9 +340,6 @@ class DataAugmenter:
 
                 # writes new images to the results directory
                 cv2.imwrite(f'{dst_path}/3quad_{image_name}.png', img)
-
-                # updates counter
-                n += 1
 
             # writes out some performance values
             print(f'n = {n} images were resized changed to quadrant 3 only.', file=outfile)
