@@ -41,7 +41,7 @@ def augment():
     if opts.cvt_ab:
         aug = DataAugmenter(src)
 
-        alpha = int(opts.cvt_ab[0])
+        alpha = float(opts.cvt_ab[0])
         beta = int(opts.cvt_ab[1])
 
         aug.cvt_alpha_beta(alpha, beta, dst)
