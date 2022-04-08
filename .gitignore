@@ -1,0 +1,8 @@
+# virtual enviornment
+sbox
+
+# Notebook checkpoints
+.ipynb_checkpoints
+__pycache__
+
+# Destination folder

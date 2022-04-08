@@ -23,6 +23,14 @@ def augment():
     if opts.dst is None:
         print('Directory not found or none specified please try again.')
         sys.exit(0)
+        
+    # resizes data
+    if opts.resize:
+        aug = DataAugmenter(src)
+        
+        n = int(opts.resize[0])
+        
+        aug.resizing(n, dst)
 
     # Convert from full image to data only in upper left hand quadrant
     if opts.cvt_gray:
@@ -34,7 +42,7 @@ def augment():
         aug = DataAugmenter(src)
 
         alpha = float(opts.cvt_ab[0])
-        beta = int(opts.cvt_ab[1])
+        beta = float(opts.cvt_ab[1])
 
         aug.cvt_alpha_beta(alpha, beta, dst)
 
@@ -60,6 +68,7 @@ def augment():
 parser = argparse.ArgumentParser(description='CLI tool for augmenting source images and corresponding annotations beore feeding into the YOLO machine learning framework.')
 parser.add_argument('--src', type=str, default=None, metavar='source_path', help='Path to source directory containing image and label stack')
 parser.add_argument('--dst', type=str, default=None, metavar='dest_path', help='Path to create a destination directory storing output')
+parser.add_argument('--resize', default=False, nargs=1, metavar=('n'), help='makes n copies of source images resized by random factor between 0.5 and 1.5')
 parser.add_argument('--cvt_gray', default=False, action='store_true', help='Converts image stack to grayscale')
 parser.add_argument('--cvt_ab', default=False, nargs=2, metavar=('alpha', 'beta'), help='Edits constants and brightness by scaling alpha and beta')
 parser.add_argument('--rot', default=False, nargs=2, metavar=('n', 'theta'), help='Rotates each image and corresponding label by random angle between 1 and theta, n times')

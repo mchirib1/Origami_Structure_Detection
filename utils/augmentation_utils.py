@@ -1,10 +1,16 @@
 import os
 import random
 import shutil
-from datetime import date
 
 import cv2
 import numpy as np
+
+
+def init_output_dir(path):
+    try:
+        os.mkdir(path)
+    except FileExistsError:
+        pass
 
 
 # convert from Yolo_mark to opencv format
@@ -46,9 +52,10 @@ class YoloRotatebbox:
         self.image_ext = image_ext
         self.angle = angle
 
-        # Read image using cv2
+        # read image using cv2
         self.image = cv2.imread(self.filename + self.image_ext, 1)
 
+        # rotation angle in radians
         rotation_angle = self.angle * np.pi / 180
         self.rot_matrix = np.array([[np.cos(rotation_angle), -np.sin(rotation_angle)],
                                     [np.sin(rotation_angle), np.cos(rotation_angle)]])
@@ -113,6 +120,7 @@ class YoloRotatebbox:
         """
         Rotates an image (angle in degrees) and expands image to avoid cropping
         """
+
         height, width = self.image.shape[:2]  # image shape has 3 dimensions
         image_center = (width / 2,
                         height / 2)  # getRotationMatrix2D needs coordinates in reverse order (width, height) compared to shape
@@ -133,12 +141,12 @@ class YoloRotatebbox:
 
         # rotate image with the new bounds and translated rotation matrix
         rotated_mat = cv2.warpAffine(self.image, rotation_mat, (bound_w, bound_h))
+
         return rotated_mat
 
 
 class DataAugmenter:
-    '''A class to help with data augmentation of the triangle image analysis data.  Handles things like numerical
-    augmentations as well as rotations.'''
+    '''This class provides functions to augment AFM raw image data.'''
 
     def __init__(self, src_dir):
         self.src_dir = src_dir
@@ -148,69 +156,58 @@ class DataAugmenter:
         self.labels = [file for file in os.listdir(src_dir) if file.split(".")[1] == 'txt'
                        and file != 'classes.txt']
 
-        self.date = date.today().strftime('%Y%m%d')
-
     def resizing(self, n, dst_path):
-        '''Rescales all the images in a directory to a random height and width'''
+        '''Creates n copies of each image scaled by a random factor between 0.5 and 1.
+           Currenlty does not scale annotations as well.'''
 
-        os.chdir(self.src_dir)
-
-        # make directory to store results
-        try:
-            os.mkdir(dst_path)
-        except FileExistsError:
-            pass
-
+        # make directory to store output
+        init_output_dir(dst_path)
+        
+        # loop to make n copies
         for _ in range(0, n):
-
+        
             for image in sorted(self.images):
                 image_name = image.split('.')[0]
+                
                 # read in image
                 img = cv2.imread(image, cv2.IMREAD_COLOR)
 
                 # desired height and width
                 h, w = img.shape[:2]
-
-                r = round(random.uniform(0.65, 1), 2)
-
+                
+                # generates random scaling factor between 0.5 and 1
+                r = round(random.uniform(0.5, 1), 2)
+                
                 new_h = round(h * r)
                 new_w = round(w * r)
-
+                
+                # resizes source image Bilinear interpolation (used by default) 
                 resized = cv2.resize(img, (new_w, new_h))
+                
+                # pad = np.zeros(resized.shape[:3])
+                # y_offset = 0
+                # x_offset = 0
 
-                pad = np.zeros(img.shape[:3])
-                y_offset = 0
-                x_offset = 0
+                # pad[x_offset:resized.shape[0] + x_offset, y_offset:resized.shape[1] + y_offset] = resized
 
-                pad[x_offset:resized.shape[0] + x_offset, y_offset:resized.shape[1] + y_offset] = resized
-
-                cv2.imwrite(f'{dst_path}/{image_name}_scaled.png', pad)
-
-        for label in self.labels:
-            label_name = label.split('.')[0]
-            shutil.copy(label, f'{dst_path}/{label_name}_scaled.txt')
+                cv2.imwrite(f'{dst_path}/{image_name}_scaledby{r}.png', resized)
+            
+            # also copies the annotations to the results directory
+            for file in self.labels:
+                shutil.copy(f'{self.src_dir}/{file}', f'{dst_path}/gray_{file}')
 
     def cvt_grayscale(self, dst_path):
         '''Converts all the images in a directory to grayscale'''
 
         # make directory to store results
-        try:
-            os.mkdir(dst_path)
-        except FileExistsError:
-            pass
-
-        # innit counter
-        n = 0
-
+        init_output_dir(dst_path)
+        
         # loop through the images
-        for image in self.images:
+        for n, image in enumerate(self.images):
             image_name = image.split('.')[0]
             img_gray = cv2.imread(f'{self.src_dir}/{image}', cv2.IMREAD_GRAYSCALE)
 
             cv2.imwrite(f'{dst_path}/gray_{image_name}.png', img_gray)
-
-            # update counter
-            n += 1
 
         # also copies the annotations to the results directory
         for file in self.labels:
@@ -224,61 +221,37 @@ class DataAugmenter:
         One can consider f(i,j) the source pixel and g(i,j) the edited pixel intensity. Controlling the alpha and beta
         values modulate pixel intensity according to the equation:       g(i,j) = alpha * f(i,j) + beta '''
 
-        os.chdir(self.src_dir)
-
         a = alpha  # scales contrast
         b = beta  # scales brightness
 
-        # makes a directory to store the results
-        try:
-            os.mkdir(dst_path)
-        except FileExistsError:
-            pass
-
-        # innit counter
-        n = 0
+        # make directory to store results
+        init_output_dir(dst_path)
 
         # loop through images
-        for image in self.images:
+        for n, image in enumerate(self.images):
             image_name = image.split('.')[0]
             img = cv2.imread(f'{self.src_dir}/{image}', cv2.IMREAD_COLOR)
 
-            #  utilize opencv method instead of "triple for loop"
+            #  utilize opencv method instead of "triple for-loop"
             new_image = cv2.convertScaleAbs(img, alpha=a, beta=b)
 
-            # simple logic to avoid decimal file names
-            # to avoid decimals in file names an alpha < 0 are named 'lowcon'
-            # a better naming convention is needed
-            if a < 1:
-                cv2.imwrite(f'{dst_path}/alphaLocon_beta{b}_{image_name}.png', new_image)
-            else:
-                cv2.imwrite(f'{dst_path}/alpha{int(a)}_beta{b}_{image_name}.png', new_image)
-
-            # update counter
-            n += 1
+            cv2.imwrite(f'{dst_path}/alpha{a}_beta{b}_{image_name}.png', new_image)
 
         # copies the annotations into the results directory with the same name as the edited images
         for file in self.labels:
-            if a < 1:
-                shutil.copy(f'{self.src_dir}/{file}', f'{dst_path}/alphaLocon_beta{b}_{file}')
-            else:
-                shutil.copy(f'{self.src_dir}/{file}', f'{dst_path}/alpha{int(a)}_beta{b}_{file}')
+            shutil.copy(f'{self.src_dir}/{file}', f'{dst_path}/alpha{a}_beta{b}_{file}')
 
         print(f'{n} images scaled using alpha={a} and beta={b}.')
 
     def rotate_img(self, n_rotations, r_angle, dst_path):
         '''Rotates an image n times with the  angle of rotation randomly selected from 1 < r < angle.'''
 
+        # make directory to store results
+        init_output_dir(dst_path)
         os.chdir(self.src_dir)
-
-        # makes a directory to store results in
-        try:
-            os.mkdir(dst_path)
-        except FileExistsError:
-            pass
-
+        
         # sets the number of rotations which need to be augmented
-        for i in range(0, n_rotations):
+        for _ in range(0, n_rotations):
 
             # loops over each image to rotate
             for image in self.images:
