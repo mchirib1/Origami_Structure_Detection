@@ -235,12 +235,20 @@ class DataAugmenter:
             #  utilize opencv method instead of "triple for-loop"
             new_image = cv2.convertScaleAbs(img, alpha=a, beta=b)
 
-            cv2.imwrite(f'{dst_path}/alpha{a}_beta{b}_{image_name}.png', new_image)
+            # simple logic to avoid decimal file names
+            # to avoid decimals in file names an alpha < 0 are named 'lowcon'
+            # a better naming convention is needed
+            if a < 1:
+                cv2.imwrite(f'{dst_path}/alphaLocon_beta{b}_{image_name}.png', new_image)
+            else:
+                cv2.imwrite(f'{dst_path}/alpha{int(a)}_beta{b}_{image_name}.png', new_image)
 
         # copies the annotations into the results directory with the same name as the edited images
         for file in self.labels:
-            shutil.copy(f'{self.src_dir}/{file}', f'{dst_path}/alpha{a}_beta{b}_{file}')
-
+            if a < 1:
+                shutil.copy(f'{self.src_dir}/{file}', f'{dst_path}/alphaLocon_beta{b}_{file}')
+            else:
+                shutil.copy(f'{self.src_dir}/{file}', f'{dst_path}/alpha{int(a)}_beta{b}_{file}')
         print(f'{n} images scaled using alpha={a} and beta={b}.')
 
     def rotate_img(self, n_rotations, r_angle, dst_path):
